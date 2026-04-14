@@ -1,0 +1,50 @@
+###############################################################################
+# docker-compose.yml
+# Local development services for eclat.
+#
+# USAGE:
+#   docker compose up -d          # Start services in background
+#   docker compose down           # Stop services
+#   docker compose down -v        # Stop and delete all data (fresh start)
+#
+# Or use the setup script which handles everything automatically:
+#   ./scripts/setup-local.sh
+#
+# Services:
+#   postgres  — Primary database (persistent across restarts)
+#
+# External services (no local containers needed):
+#   Upstash Redis — rate limiting uses REST API, mocked in dev (MOCK_EXTERNAL_SERVICES=true)
+#   Pusher        — real-time messaging, mocked in dev
+#   Daily.co      — video calls, mocked in dev
+#   Stripe        — payments, use test mode keys + stripe CLI
+#   Razorpay      — payments, use test mode keys
+#   Resend        — email, use dev API key or onboarding@resend.dev
+#   AWS KMS       — encryption, falls back to base64 in dev (NODE_ENV !== production)
+###############################################################################
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       eclat_dev
+      POSTGRES_USER:     eclat
+      POSTGRES_PASSWORD: eclat_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eclat -d eclat_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres_data:
+    driver: local
+    # Data persists across `docker compose up/down`
+    # To reset: docker compose down -v

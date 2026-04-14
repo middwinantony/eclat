@@ -1,0 +1,225 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─── eclat Design System ─────────────────────────────────────────────────── */
+
+:root {
+  /* Brand colours */
+  --eclat-bg:           #080808;
+  --eclat-surface:      #111111;
+  --eclat-surface-2:    #1A1A1A;
+  --eclat-border:       rgba(255, 255, 255, 0.07);
+  --eclat-border-gold:  rgba(201, 168, 76, 0.25);
+  --eclat-fg:           #F5F0E8;
+  --eclat-muted:        #888888;
+  --eclat-gold:         #C9A84C;
+  --eclat-gold-light:   #E8C96A;
+  --eclat-gold-muted:   rgba(201, 168, 76, 0.12);
+  --eclat-gold-glow:    rgba(201, 168, 76, 0.15);
+
+  /* Typography */
+  --font-heading: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+
+  /* Spacing / layout */
+  --max-width:    1200px;
+  --radius:       0.75rem;
+
+  /* shadcn token overrides — mapped to eclat palette */
+  --background:          #080808;
+  --foreground:          #F5F0E8;
+  --card:                #111111;
+  --card-foreground:     #F5F0E8;
+  --popover:             #111111;
+  --popover-foreground:  #F5F0E8;
+  --primary:             #C9A84C;
+  --primary-foreground:  #080808;
+  --secondary:           #1A1A1A;
+  --secondary-foreground:#F5F0E8;
+  --muted:               #1A1A1A;
+  --muted-foreground:    #888888;
+  --accent:              #1A1A1A;
+  --accent-foreground:   #F5F0E8;
+  --destructive:         #E53E3E;
+  --border:              rgba(255, 255, 255, 0.07);
+  --input:               rgba(255, 255, 255, 0.07);
+  --ring:                rgba(201, 168, 76, 0.4);
+  --radius:              0.75rem;
+}
+
+/* ─── Base resets ────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--eclat-bg);
+  color: var(--eclat-fg);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* ─── Typography scale ───────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Layout helpers ─────────────────────────────────────────────────────── */
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .container { padding-inline: 2rem; }
+}
+
+@media (min-width: 1280px) {
+  .container { padding-inline: 2.5rem; }
+}
+
+.section {
+  padding-block: 6rem;
+}
+
+@media (min-width: 768px) {
+  .section { padding-block: 8rem; }
+}
+
+/* ─── Button primitives ──────────────────────────────────────────────────── */
+
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--eclat-gold);
+  color: #080808;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-gold:hover {
+  background: var(--eclat-gold-light);
+  transform: translateY(-1px);
+}
+
+.btn-gold:active {
+  transform: translateY(0);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--eclat-fg);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--eclat-border);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ─── Grain texture overlay ──────────────────────────────────────────────── */
+/* Applied to the hero section for cinematic film texture */
+
+.grain-overlay {
+  position: relative;
+}
+
+.grain-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.045;
+}
+
+/* ─── Gold glow utility ──────────────────────────────────────────────────── */
+
+.gold-glow {
+  box-shadow: 0 0 40px var(--eclat-gold-glow);
+}
+
+/* ─── Divider ────────────────────────────────────────────────────────────── */
+
+.divider-gold {
+  width: 3rem;
+  height: 1px;
+  background: var(--eclat-gold);
+  display: block;
+}
+
+/* ─── Tailwind @theme inline overrides ──────────────────────────────────── */
+
+@theme inline {
+  --color-background:        var(--background);
+  --color-foreground:        var(--foreground);
+  --color-card:              var(--card);
+  --color-card-foreground:   var(--card-foreground);
+  --color-primary:           var(--primary);
+  --color-primary-foreground:var(--primary-foreground);
+  --color-secondary:         var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:             var(--muted);
+  --color-muted-foreground:  var(--muted-foreground);
+  --color-accent:            var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive:       var(--destructive);
+  --color-border:            var(--border);
+  --color-input:             var(--input);
+  --color-ring:              var(--ring);
+  --radius-sm:  calc(var(--radius) - 0.25rem);
+  --radius-md:  calc(var(--radius) - 0.125rem);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) + 0.25rem);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

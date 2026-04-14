@@ -1,0 +1,39 @@
+###############################################################################
+# docker-compose.test.yml
+# Ephemeral services for CI test runs and local test execution.
+#
+# USAGE (local):
+#   docker compose -f docker-compose.test.yml up -d
+#   pnpm test:run
+#   docker compose -f docker-compose.test.yml down -v
+#
+# In CI (GitHub Actions), this file is not used directly —
+# the workflow uses the postgres service container which GitHub manages.
+# This file is for running the full test suite locally against real DB.
+#
+# Key differences from docker-compose.yml:
+#   - No persistent volumes (fresh database on every run)
+#   - Different DB name (eclat_test) to avoid clobbering dev data
+#   - tmpfs for postgres data dir = faster test runs
+###############################################################################
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB:       eclat_test
+      POSTGRES_USER:     eclat_test
+      POSTGRES_PASSWORD: test_password
+    ports:
+      - "5433:5432"  # Port 5433 to avoid conflicts with dev postgres on 5432
+    tmpfs:
+      - /var/lib/postgresql/data  # In-memory — maximum speed, no persistence
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eclat_test -d eclat_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+# No volumes block — everything is ephemeral

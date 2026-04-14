@@ -1,0 +1,319 @@
+// eclat — Prisma Schema
+// Database: PostgreSQL 15 (AWS RDS)
+// All sensitive fields (messages, IPs, govt IDs) are encrypted at the
+// application layer via lib/security/encrypt.ts before storage.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  MEMBER
+  MATCHMAKER
+  ADMIN
+}
+
+enum VerificationStatus {
+  PENDING
+  IN_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum MembershipTier {
+  SELECT
+  RESERVE
+  NOIR
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  TRIALING
+  INCOMPLETE
+}
+
+enum DocumentType {
+  PASSPORT
+  AADHAAR
+  DRIVING_LICENCE
+  OTHER
+}
+
+enum QueueAction {
+  UNSEEN
+  INTERESTED
+  PASSED
+  EXPIRED
+}
+
+enum MatchStatus {
+  PENDING    // one side interested, awaiting the other
+  ACTIVE     // mutual interest — conversation unlocked
+  UNMATCHED  // one party ended it
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  PREFER_NOT_TO_SAY
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+model User {
+  id                 String             @id @default(cuid())
+  email              String             @unique
+  name               String
+  dateOfBirth        DateTime
+  passwordHash       String?            // null for OAuth-only accounts
+  role               Role               @default(MEMBER)
+  verificationStatus VerificationStatus @default(PENDING)
+  membershipTier     MembershipTier?    // null until subscription active
+  deletedAt          DateTime?          // soft-delete; hard-delete via Lambda 30 days later
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  // Relations
+  profile            Profile?
+  subscription       Subscription?
+  verificationRecord VerificationRecord?
+  oauthAccounts      OAuthAccount[]
+
+  // Queue — entries where this user is the subject
+  queueEntries       DailyQueue[]       @relation("QueueUser")
+  // Queue — entries where this user is the candidate shown to others
+  queueCandidates    DailyQueue[]       @relation("QueueCandidate")
+
+  // Matches — both sides
+  matchesAsUser1     Match[]            @relation("MatchUser1")
+  matchesAsUser2     Match[]            @relation("MatchUser2")
+
+  // Messages sent
+  sentMessages       Message[]
+
+  // Blocks
+  blocking           Block[]            @relation("Blocker")
+  blockedBy          Block[]            @relation("Blocked")
+
+  // Audit
+  auditLogs          AuditLog[]
+
+  @@index([email])
+  @@index([verificationStatus])
+  @@index([membershipTier])
+  @@index([deletedAt])
+}
+
+// OAuth accounts (Google, etc.)
+model OAuthAccount {
+  id                String  @id @default(cuid())
+  userId            String
+  provider          String  // "google"
+  providerAccountId String
+  accessToken       String?
+  refreshToken      String?
+  expiresAt         Int?
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// ─── Profile ─────────────────────────────────────────────────────────────────
+
+model Profile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  bio           String?   @db.Text
+  profession    String?
+  employer      String?
+  location      String?   // city name, e.g. "Mumbai"
+  gender        Gender?
+  lookingFor    Gender[]  // array of preferred genders
+  photos        String[]  // S3 keys (NOT URLs — resolved at query time)
+  interests     String[]  // free-form tags
+  linkedinUrl   String?
+  isVisible     Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([location])
+}
+
+// ─── Verification ─────────────────────────────────────────────────────────────
+
+model VerificationRecord {
+  id              String             @id @default(cuid())
+  userId          String             @unique
+  documentType    DocumentType
+  // Stored as KMS-encrypted ciphertext — never plain S3 key
+  documentKeyEnc  String
+  livenessVideoKeyEnc String?
+  submittedAt     DateTime           @default(now())
+  reviewedAt      DateTime?
+  reviewedBy      String?            // admin userId
+  rejectionReason String?
+  status          VerificationStatus @default(PENDING)
+
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([submittedAt])
+}
+
+// ─── Subscriptions ────────────────────────────────────────────────────────────
+
+model Subscription {
+  id                     String             @id @default(cuid())
+  userId                 String             @unique
+  tier                   MembershipTier
+  status                 SubscriptionStatus
+  // Stripe (international)
+  stripeCustomerId       String?
+  stripeSubscriptionId   String?
+  stripePriceId          String?
+  // Razorpay (India)
+  razorpayCustomerId     String?
+  razorpaySubscriptionId String?
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  cancelAtPeriodEnd      Boolean            @default(false)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([stripeSubscriptionId])
+  @@index([razorpaySubscriptionId])
+  @@index([status])
+}
+
+// ─── Daily Queue ──────────────────────────────────────────────────────────────
+
+model DailyQueue {
+  id          String      @id @default(cuid())
+  userId      String      // who receives this introduction
+  candidateId String      // who is being shown
+  date        DateTime    @db.Date
+  action      QueueAction @default(UNSEEN)
+  seenAt      DateTime?
+  actedAt     DateTime?
+  createdAt   DateTime    @default(now())
+
+  user        User        @relation("QueueUser",      fields: [userId],      references: [id], onDelete: Cascade)
+  candidate   User        @relation("QueueCandidate", fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, candidateId, date])
+  @@index([userId, date])
+  @@index([action])
+  @@index([date])
+}
+
+// ─── Matches ──────────────────────────────────────────────────────────────────
+
+model Match {
+  id           String      @id @default(cuid())
+  user1Id      String
+  user2Id      String
+  status       MatchStatus @default(PENDING)
+  matchedAt    DateTime?   // when both sides interested
+  unmatchedAt  DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  user1        User        @relation("MatchUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2        User        @relation("MatchUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  conversation Conversation?
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id, status])
+  @@index([user2Id, status])
+}
+
+// ─── Conversations & Messages ─────────────────────────────────────────────────
+
+model Conversation {
+  id        String    @id @default(cuid())
+  matchId   String    @unique
+  createdAt DateTime  @default(now())
+
+  match     Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@index([matchId])
+}
+
+model Message {
+  id             String        @id @default(cuid())
+  conversationId String
+  senderId       String
+  // Stored as KMS-encrypted ciphertext
+  contentEnc     String        @db.Text
+  status         MessageStatus @default(SENT)
+  sentAt         DateTime      @default(now())
+  deliveredAt    DateTime?
+  readAt         DateTime?
+
+  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User          @relation(fields: [senderId],       references: [id], onDelete: Cascade)
+
+  @@index([conversationId, sentAt])
+  @@index([senderId])
+}
+
+// ─── Blocks ───────────────────────────────────────────────────────────────────
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+// ─── Audit Log ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?  // null for unauthenticated actions
+  action     String   // AuditAction union value
+  entityType String?
+  entityId   String?
+  // IP stored as KMS-encrypted ciphertext for GDPR compliance
+  ipAddress  String?
+  userAgent  String?
+  metadata   String?  // JSON string
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
