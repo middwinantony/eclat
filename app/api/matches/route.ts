@@ -37,7 +37,7 @@ export async function GET(_req: NextRequest) {
   })
 
   // Normalise: always expose the "other" person from this user's perspective
-  const normalised = matches.map((m) => {
+  const normalised = matches.map((m: typeof matches[number]) => {
     const otherUser = m.user1Id === userId ? m.user2 : m.user1
     return {
       id:             m.id,

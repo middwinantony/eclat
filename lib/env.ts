@@ -83,6 +83,9 @@ export function validateEnv(): void {
   // Only run on the server
   if (typeof window !== "undefined") return
 
+  // Allow skipping validation during Docker builds
+  if (process.env.SKIP_ENV_VALIDATION === "1") return
+
   const isProduction = process.env.NODE_ENV === "production"
   const enablePayments = process.env.ENABLE_PAYMENTS === "true" || isProduction
   const enableRealtime = process.env.ENABLE_REALTIME === "true" || isProduction

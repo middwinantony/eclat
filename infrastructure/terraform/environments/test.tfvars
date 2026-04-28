@@ -50,7 +50,6 @@ enable_background_jobs = false   # No Lambda/SQS/EventBridge — trigger via API
 enable_secrets_manager = false   # Set env vars in App Runner console instead — saves $6/mo
 use_waf                = false   # No WAF in test — saves $5/mo
 use_cloudfront         = true    # Needed for S3 profile photo serving
-create_app_runner_service = false  # Set to true only after CI pushes a real image to ECR — placeholder node:alpine has no web server
 
 # ─── Database (Neon) ──────────────────────────────────────────────────────────
 # FILL IN: your Neon connection string
@@ -73,14 +72,15 @@ app_runner_min_size = 1      # AWS minimum is 1 (scale-to-zero not supported)
 app_runner_max_size = 1      # Single instance — not for load testing
 
 # Placeholder until first CI/CD build pushes a real image
-ecr_image_uri = "public.ecr.aws/docker/library/node:20-alpine"
+create_app_runner_service = true
+ecr_image_uri = "524419234223.dkr.ecr.ap-southeast-1.amazonaws.com/eclat-test:latest"
 
 # ─── Networking (not used when enable_vpc = false) ───────────────────────────
 vpc_cidr = "10.3.0.0/16"
 
 # ─── Monitoring ───────────────────────────────────────────────────────────────
 # FILL IN: your email address for alarm notifications
-alert_email = "YOUR_EMAIL@example.com"
+alert_email = "middwincortex@gmail.com"
 
 # ─── Security ────────────────────────────────────────────────────────────────
 waf_geo_allow_countries = ["IN", "AE", "GB", "US", "SG", "AU", "CA"]

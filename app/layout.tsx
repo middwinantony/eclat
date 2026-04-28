@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Bricolage_Grotesque, DM_Sans } from "next/font/google"
+import { Bricolage_Grotesque, DM_Sans, Cormorant_Garamond } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { validateEnv } from "@/lib/env"
@@ -20,6 +20,15 @@ const dmSans = DM_Sans({
   variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+})
+
+// Serif italic — used for romantic headline accents only
+const cormorant = Cormorant_Garamond({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["italic"],
   display: "swap",
 })
 
@@ -44,12 +53,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
-        "h-full antialiased dark",
+        "h-full antialiased",
         bricolage.variable,
-        dmSans.variable
+        dmSans.variable,
+        cormorant.variable,
       )}
     >
-      <body className="min-h-full flex flex-col bg-[#080808] text-[#F5F0E8] font-[family-name:var(--font-body)]">
+      <body className="min-h-full flex flex-col bg-[#FAF7F4] text-[#1C1218] font-[family-name:var(--font-body)]">
         {children}
       </body>
     </html>

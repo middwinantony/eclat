@@ -308,13 +308,16 @@ resource "aws_cloudfront_distribution" "main" {
   }
 
   # Default cache behaviour — routes to App Runner (Next.js)
+  # AllViewerExceptHostHeader origin request policy forwards cookies (incl. session token)
+  # to App Runner so Next.js middleware can read the session on every page request.
   default_cache_behavior {
-    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "apprunner"
-    viewer_protocol_policy = "redirect-to-https"
-    compress               = true
-    cache_policy_id        = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CachingDisabled — App Runner handles its own caching
+    allowed_methods           = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods            = ["GET", "HEAD"]
+    target_origin_id          = "apprunner"
+    viewer_protocol_policy    = "redirect-to-https"
+    compress                  = true
+    cache_policy_id           = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CachingDisabled
+    origin_request_policy_id  = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # AllViewerExceptHostHeader
 
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
@@ -332,15 +335,19 @@ resource "aws_cloudfront_distribution" "main" {
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }
 
-  # Cache behaviour for /api/* — no caching, pass all headers through
+  # Cache behaviour for /api/* — no caching, pass all headers + cookies through
+  # AllViewerExceptHostHeader origin request policy is required so CloudFront
+  # forwards auth cookies (e.g. __Host-authjs.csrf-token) to App Runner.
+  # Without this, NextAuth CSRF checks fail because the cookie is stripped.
   ordered_cache_behavior {
-    path_pattern           = "/api/*"
-    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "apprunner"
-    viewer_protocol_policy = "redirect-to-https"
-    compress               = false
-    cache_policy_id        = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CachingDisabled
+    path_pattern              = "/api/*"
+    allowed_methods           = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods            = ["GET", "HEAD"]
+    target_origin_id          = "apprunner"
+    viewer_protocol_policy    = "redirect-to-https"
+    compress                  = false
+    cache_policy_id           = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CachingDisabled
+    origin_request_policy_id  = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # AllViewerExceptHostHeader
 
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
   }

@@ -16,7 +16,7 @@ import {
 const kmsClient = new KMSClient({ region: process.env.AWS_REGION ?? 'ap-southeast-1' })
 const KMS_KEY_ARN = process.env.AWS_KMS_KEY_ARN
 
-if (!KMS_KEY_ARN && process.env.NODE_ENV === 'production') {
+if (!KMS_KEY_ARN && process.env.NODE_ENV === 'production' && process.env.SKIP_ENV_VALIDATION !== '1') {
   throw new Error('AWS_KMS_KEY_ARN environment variable is required in production')
 }
 

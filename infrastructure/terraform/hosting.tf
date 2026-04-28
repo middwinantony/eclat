@@ -208,10 +208,17 @@ resource "aws_apprunner_service" "eclat" {
         # Secrets are fetched at startup via the instance role — not hardcoded here.
         runtime_environment_variables = merge(
           {
-            NODE_ENV    = var.environment == "prod" ? "production" : var.environment
-            PORT        = "3000"
-            AWS_REGION  = var.aws_region
-            ENVIRONMENT = var.environment
+            NODE_ENV               = "production"
+            PORT                   = "3000"
+            # Override the container hostname App Runner injects so Next.js
+            # standalone server.js binds to 0.0.0.0, not the internal IP.
+            # Without this, health checks to localhost:3000 get connection refused.
+            HOSTNAME               = "0.0.0.0"
+            AWS_REGION             = var.aws_region
+            ENVIRONMENT            = var.environment
+            # Allows the service to start before all secrets are configured.
+            # Remove this once all env vars are set in the App Runner console.
+            SKIP_ENV_VALIDATION    = "1"
           },
           # When using Neon (use_rds = false), inject DATABASE_URL directly.
           # For RDS, the app reads /eclat/{env}/database-url from Secrets Manager.

@@ -22,7 +22,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="section bg-[#080808]" aria-label="How it works">
+    <section id="how-it-works" className="section bg-[#FAF7F4]" aria-label="How it works">
       <div className="container">
 
         {/* Header */}
@@ -33,23 +33,27 @@ export default function HowItWorks() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-20 md:mb-24"
         >
-          <span className="block divider-gold mb-6" aria-hidden="true" />
+          {/* Ornament */}
+          <div className="ornament" aria-hidden="true">
+            <span className="ornament-dot">✦</span>
+          </div>
+
           <h2
-            className="font-[family-name:var(--font-heading)] font-bold text-[#F5F0E8] leading-[1.05] tracking-[-0.03em] mb-4"
+            className="font-[family-name:var(--font-heading)] font-bold text-[#1C1218] leading-[1.05] tracking-[-0.03em]"
             style={{ fontSize: "clamp(2rem, 5vw, 3.25rem)" }}
           >
-            Three steps to your
-            <br />
-            <span
+            Three steps to your{" "}
+            <em
               style={{
-                background: "linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #C9A84C 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
+                fontFamily: "var(--font-serif)",
+                fontStyle: "italic",
+                fontWeight: 500,
+                color: "#A8476A",
+                fontSize: "1.05em",
               }}
             >
               first introduction.
-            </span>
+            </em>
           </h2>
         </motion.div>
 
@@ -62,12 +66,15 @@ export default function HowItWorks() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.65, ease: "easeOut", delay: i * 0.12 }}
-              className="relative grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6 md:gap-16 py-12 md:py-16 border-b border-white/[0.06] last:border-b-0 group"
+              className="relative grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 md:gap-16 py-14 md:py-16 border-b border-black/[0.07] last:border-b-0"
             >
-              {/* Large background number */}
+              {/* Ghost number — right-aligned, barely visible */}
               <span
-                className="absolute -top-4 left-0 font-[family-name:var(--font-heading)] font-bold leading-none text-white/[0.025] select-none pointer-events-none"
-                style={{ fontSize: "clamp(7rem, 18vw, 14rem)" }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 font-[family-name:var(--font-heading)] font-bold leading-none select-none pointer-events-none"
+                style={{
+                  fontSize: "clamp(6rem, 14vw, 11rem)",
+                  color: "rgba(168,71,106,0.06)",
+                }}
                 aria-hidden="true"
               >
                 {step.number}
@@ -75,20 +82,29 @@ export default function HowItWorks() {
 
               {/* Left col — step label */}
               <div className="relative flex items-start gap-4 pt-1">
-                {/* Gold dot + connector */}
-                <div className="flex flex-col items-center shrink-0 mt-1">
-                  <div className="w-2 h-2 rounded-full bg-[#C9A84C] opacity-80" />
+                {/* Rose dot + connector */}
+                <div className="flex flex-col items-center shrink-0 mt-1.5">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full bg-[#A8476A]"
+                    style={{ boxShadow: "0 0 10px rgba(168,71,106,0.4)" }}
+                  />
                   {i < STEPS.length - 1 && (
-                    <div className="w-px flex-1 bg-gradient-to-b from-[rgba(201,168,76,0.3)] to-transparent mt-2 hidden md:block" style={{ minHeight: "4rem" }} />
+                    <div
+                      className="w-px flex-1 mt-2.5 hidden md:block"
+                      style={{
+                        minHeight: "4rem",
+                        background: "linear-gradient(to bottom, rgba(168,71,106,0.35), transparent)",
+                      }}
+                    />
                   )}
                 </div>
 
                 <div>
-                  <span className="text-[#C9A84C] text-[0.65rem] tracking-[0.2em] uppercase font-medium">
+                  <span className="text-[#A8476A] text-[0.65rem] tracking-[0.2em] uppercase font-semibold">
                     Step {step.number}
                   </span>
                   <h3
-                    className="font-[family-name:var(--font-heading)] font-bold text-[#F5F0E8] tracking-[-0.025em] leading-none mt-1"
+                    className="font-[family-name:var(--font-heading)] font-bold text-[#1C1218] tracking-[-0.025em] leading-none mt-1"
                     style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)" }}
                   >
                     {step.title}
@@ -98,7 +114,7 @@ export default function HowItWorks() {
 
               {/* Right col — body */}
               <div className="relative flex items-center">
-                <p className="text-[#666666] text-base md:text-lg leading-relaxed max-w-lg">
+                <p className="text-[#7A6670] text-base md:text-lg leading-relaxed max-w-lg">
                   {step.body}
                 </p>
               </div>

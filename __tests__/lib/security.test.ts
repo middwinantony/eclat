@@ -70,12 +70,16 @@ describe("checkRateLimit", () => {
   })
 
   it("returns null when limit is not exceeded", async () => {
-    vi.mock("@upstash/ratelimit", () => ({
-      Ratelimit: vi.fn().mockImplementation(() => ({
+    // vi.doMock is NOT hoisted — safe to use inside test bodies with resetModules.
+    // Ratelimit.slidingWindow is a static method called during module init — must be stubbed.
+    vi.doMock("@upstash/ratelimit", () => {
+      const RatelimitMock = vi.fn().mockImplementation(() => ({
         limit: vi.fn().mockResolvedValue({ success: true, limit: 5, remaining: 4, reset: Date.now() + 60000 }),
-      })),
-    }))
-    vi.mock("@upstash/redis", () => ({
+      }))
+      RatelimitMock.slidingWindow = vi.fn().mockReturnValue({})
+      return { Ratelimit: RatelimitMock }
+    })
+    vi.doMock("@upstash/redis", () => ({
       Redis: vi.fn().mockImplementation(() => ({})),
     }))
 
@@ -85,12 +89,14 @@ describe("checkRateLimit", () => {
   })
 
   it("returns 429 response when limit is exceeded", async () => {
-    vi.mock("@upstash/ratelimit", () => ({
-      Ratelimit: vi.fn().mockImplementation(() => ({
+    vi.doMock("@upstash/ratelimit", () => {
+      const RatelimitMock = vi.fn().mockImplementation(() => ({
         limit: vi.fn().mockResolvedValue({ success: false, limit: 5, remaining: 0, reset: Date.now() + 60000 }),
-      })),
-    }))
-    vi.mock("@upstash/redis", () => ({
+      }))
+      RatelimitMock.slidingWindow = vi.fn().mockReturnValue({})
+      return { Ratelimit: RatelimitMock }
+    })
+    vi.doMock("@upstash/redis", () => ({
       Redis: vi.fn().mockImplementation(() => ({})),
     }))
 
@@ -104,12 +110,14 @@ describe("checkRateLimit", () => {
   })
 
   it("fails open (returns null) when Redis is unavailable", async () => {
-    vi.mock("@upstash/ratelimit", () => ({
-      Ratelimit: vi.fn().mockImplementation(() => ({
+    vi.doMock("@upstash/ratelimit", () => {
+      const RatelimitMock = vi.fn().mockImplementation(() => ({
         limit: vi.fn().mockRejectedValue(new Error("Redis connection refused")),
-      })),
-    }))
-    vi.mock("@upstash/redis", () => ({
+      }))
+      RatelimitMock.slidingWindow = vi.fn().mockReturnValue({})
+      return { Ratelimit: RatelimitMock }
+    })
+    vi.doMock("@upstash/redis", () => ({
       Redis: vi.fn().mockImplementation(() => ({})),
     }))
 
@@ -198,19 +206,22 @@ describe("writeAuditLog", () => {
   })
 
   it("writes a record to the audit_log table", async () => {
-    const mockCreate = vi.fn().mockResolvedValue({ id: "audit_001" })
-
-    vi.mock("@/lib/db", () => ({
+    // Use vi.fn() directly inside the factory — never reference test-body variables
+    // from inside a vi.mock() factory (they're hoisted, so the variable isn't in scope).
+    vi.doMock("@/lib/db", () => ({
       db: {
-        auditLog: { create: mockCreate },
+        auditLog: { create: vi.fn().mockResolvedValue({ id: "audit_001" }) },
       },
     }))
-
-    vi.mock("@/lib/security/encrypt", () => ({
-      encryptOptionalField: vi.fn().mockImplementation(async (v) => v ? `enc:${v}` : null),
+    vi.doMock("@/lib/security/encrypt", () => ({
+      encryptOptionalField: vi.fn().mockImplementation(async (v: unknown) =>
+        v != null ? `enc:${String(v)}` : null
+      ),
     }))
 
+    const { db }           = await import("@/lib/db")
     const { writeAuditLog } = await import("@/lib/security/audit-log")
+    const mockCreate = vi.mocked(db.auditLog.create)
 
     await writeAuditLog({
       userId:    "user_001",
@@ -228,12 +239,10 @@ describe("writeAuditLog", () => {
   })
 
   it("does not throw if userId is null (unauthenticated action)", async () => {
-    const mockCreate = vi.fn().mockResolvedValue({ id: "audit_002" })
-
-    vi.mock("@/lib/db", () => ({
-      db: { auditLog: { create: mockCreate } },
+    vi.doMock("@/lib/db", () => ({
+      db: { auditLog: { create: vi.fn().mockResolvedValue({ id: "audit_002" }) } },
     }))
-    vi.mock("@/lib/security/encrypt", () => ({
+    vi.doMock("@/lib/security/encrypt", () => ({
       encryptOptionalField: vi.fn().mockResolvedValue(null),
     }))
 

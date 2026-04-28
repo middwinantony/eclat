@@ -2,16 +2,22 @@
  * middleware.ts
  * Next.js Edge Middleware — runs on every request before page/route handlers.
  *
+ * Uses NextAuth v5's auth() callback (backed by the edge-safe authConfig)
+ * so JWT verification works correctly with v5's encrypted tokens.
+ *
  * Responsibilities:
- *   1. Authenticate requests to protected routes (JWT validation via NextAuth)
- *   2. Apply general API rate limiting
- *   3. Add security headers
- *   4. Redirect unauthenticated users to /login
+ *   1. Authenticate requests to protected routes
+ *   2. Redirect unauthenticated users to /login
+ *   3. Enforce role-based access (admin, matchmaker)
+ *   4. Enforce verification status restrictions
  */
 
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { getToken } from 'next-auth/jwt'
+import NextAuth from "next-auth"
+import { NextResponse } from "next/server"
+import type { NextAuthRequest } from "next-auth"
+import { authConfig } from "@/lib/auth.config"
+
+const { auth } = NextAuth(authConfig)
 
 // Routes that require authentication
 const PROTECTED_PREFIXES = [
@@ -40,13 +46,9 @@ const PROTECTED_PREFIXES = [
   '/api/pusher',
 ]
 
-// Routes that require admin role
-const ADMIN_PREFIXES = ['/admin', '/api/admin']
-
-// Routes that require matchmaker role
+const ADMIN_PREFIXES      = ['/admin',      '/api/admin']
 const MATCHMAKER_PREFIXES = ['/matchmaker', '/api/matchmaker']
 
-// Routes excluded from ALL checks (public)
 const PUBLIC_PATHS = [
   '/',
   '/login',
@@ -64,9 +66,7 @@ const PUBLIC_PATHS = [
 ]
 
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(p + '/')
-  )
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
 }
 
 function requiresAuth(pathname: string): boolean {
@@ -81,58 +81,50 @@ function requiresMatchmaker(pathname: string): boolean {
   return MATCHMAKER_PREFIXES.some((p) => pathname.startsWith(p))
 }
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+export default auth(async (req: NextAuthRequest) => {
+  const { pathname } = req.nextUrl
 
   // Skip middleware for public paths
-  if (isPublicPath(pathname)) {
-    return NextResponse.next()
-  }
+  if (isPublicPath(pathname)) return NextResponse.next()
 
   // Only apply auth checks to protected routes
-  if (!requiresAuth(pathname)) {
-    return NextResponse.next()
-  }
+  if (!requiresAuth(pathname)) return NextResponse.next()
 
-  // Validate JWT token
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  })
+  const session = req.auth
 
   // Unauthenticated — redirect to login
-  if (!token) {
+  if (!session?.user) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
-    const loginUrl = new URL('/login', request.url)
+    const loginUrl = new URL('/login', req.url)
     loginUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
   // Check admin routes
-  if (requiresAdmin(pathname) && token.role !== 'ADMIN') {
+  if (requiresAdmin(pathname) && session.user.role !== 'ADMIN') {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
   // Check matchmaker routes
   if (
     requiresMatchmaker(pathname) &&
-    token.role !== 'MATCHMAKER' &&
-    token.role !== 'ADMIN'
+    session.user.role !== 'MATCHMAKER' &&
+    session.user.role !== 'ADMIN'
   ) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
   // Check verification status — unverified users can only access billing and settings
   if (
-    token.verificationStatus !== 'VERIFIED' &&
+    session.user.verificationStatus !== 'VERIFIED' &&
     !pathname.startsWith('/dashboard/billing') &&
     !pathname.startsWith('/dashboard/settings') &&
     !pathname.startsWith('/api/billing') &&
@@ -140,20 +132,19 @@ export async function middleware(request: NextRequest) {
     (pathname.startsWith('/dashboard') || pathname.startsWith('/browse') || pathname.startsWith('/matches'))
   ) {
     if (pathname.startsWith('/api/')) {
-      return NextResponse.json(
-        { error: 'Profile verification required' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Profile verification required' }, { status: 403 })
     }
-    return NextResponse.redirect(new URL('/dashboard?verification=pending', request.url))
+    return NextResponse.redirect(new URL('/dashboard?verification=pending', req.url))
   }
 
   return NextResponse.next()
-}
+})
 
 export const config = {
   matcher: [
-    // Match all paths except static files
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.svg|.*\\.ico).*)',
+    // Exclude NextAuth's own API routes — middleware must never intercept them.
+    // When auth() wraps the middleware and runs on /api/auth/callback/*, it
+    // interferes with PKCE cookie handling and causes "Invalid code verifier".
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.svg|.*\\.ico|api/auth).*)',
   ],
 }

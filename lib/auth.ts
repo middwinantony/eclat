@@ -28,13 +28,13 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string
-    role: Role
-    verificationStatus: VerificationStatus
-    membershipTier: MembershipTier | null
-  }
+// Custom JWT fields (augmentation removed — next-auth/jwt unresolvable during next build)
+type AppJWT = {
+  id: string
+  role: Role
+  verificationStatus: VerificationStatus
+  membershipTier: MembershipTier | null
+  [key: string]: unknown
 }
 
 const config: NextAuthConfig = {
@@ -103,11 +103,12 @@ const config: NextAuthConfig = {
   callbacks: {
     // Persist custom fields into the JWT
     async jwt({ token, user, account, trigger }) {
+      const t = token as AppJWT
       if (user) {
-        token.id                = user.id as string
-        token.role              = user.role
-        token.verificationStatus= user.verificationStatus
-        token.membershipTier    = user.membershipTier
+        t.id                = user.id as string
+        t.role              = user.role
+        t.verificationStatus= user.verificationStatus
+        t.membershipTier    = user.membershipTier
       }
 
       // On OAuth sign-in, upsert the user record
@@ -118,17 +119,17 @@ const config: NextAuthConfig = {
         })
 
         if (existing) {
-          token.id                = existing.id
-          token.role              = existing.role
-          token.verificationStatus= existing.verificationStatus
-          token.membershipTier    = existing.membershipTier
+          t.id                = existing.id
+          t.role              = existing.role
+          t.verificationStatus= existing.verificationStatus
+          t.membershipTier    = existing.membershipTier
         } else {
           // Create user on first Google sign-in
           const created = await db.user.create({
             data: {
               email:       user.email,
               name:        user.name ?? "eclat Member",
-              dateOfBirth: new Date("2000-01-01"), // placeholder — collected at onboarding
+              dateOfBirth: new Date("2000-01-01"),
               oauthAccounts: {
                 create: {
                   provider:          account.provider,
@@ -140,10 +141,10 @@ const config: NextAuthConfig = {
               },
             },
           })
-          token.id                = created.id
-          token.role              = created.role
-          token.verificationStatus= created.verificationStatus
-          token.membershipTier    = null
+          t.id                = created.id
+          t.role              = created.role
+          t.verificationStatus= created.verificationStatus
+          t.membershipTier    = null
 
           await writeAuditLog({
             userId:   created.id,
@@ -179,35 +180,46 @@ const config: NextAuthConfig = {
       }
 
       // Refresh verification status on each token refresh
-      if (trigger === "update" && token.id) {
+      if (trigger === "update" && t.id) {
         const fresh = await db.user.findUnique({
-          where: { id: token.id },
+          where: { id: t.id },
           select: { verificationStatus: true, membershipTier: true, role: true },
         })
         if (fresh) {
-          token.verificationStatus = fresh.verificationStatus
-          token.membershipTier     = fresh.membershipTier
-          token.role               = fresh.role
+          t.verificationStatus = fresh.verificationStatus
+          t.membershipTier     = fresh.membershipTier
+          t.role               = fresh.role
         }
       }
 
-      return token
+      return t
     },
 
     // Expose custom fields to the client-side session
     async session({ session, token }) {
-      session.user.id                = token.id
-      session.user.role              = token.role
-      session.user.verificationStatus= token.verificationStatus
-      session.user.membershipTier    = token.membershipTier
+      const t = token as AppJWT
+      session.user.id                = t.id
+      session.user.role              = t.role
+      session.user.verificationStatus= t.verificationStatus
+      session.user.membershipTier    = t.membershipTier
       return session
     },
   },
 
   events: {
     async signIn({ user }) {
-      if (user.id) {
-        await writeAuditLog({ userId: user.id, action: "login_success" })
+      // user.id is the OAuth provider's ID for Google sign-ins, not our DB UUID.
+      // Look up by email to get the real DB user ID.
+      if (!user.email) return
+      const dbUser = await db.user.findUnique({
+        where: { email: user.email },
+        select: { id: true },
+      })
+      // For brand-new Google sign-ins the user record is created later in the
+      // jwt callback, so dbUser may be null — that first login is already
+      // logged by the profile_created audit entry in the jwt callback.
+      if (dbUser) {
+        await writeAuditLog({ userId: dbUser.id, action: "login_success" })
       }
     },
     async signOut(message) {

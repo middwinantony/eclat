@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { motion, type Variants } from "framer-motion"
-import { ArrowRight, ShieldCheck } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 // ── Animation variants ─────────────────────────────────────────────────────
 const container: Variants = {
@@ -28,43 +28,59 @@ const fadeIn: Variants = {
 export default function Hero() {
   return (
     <section
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden grain-overlay"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
       aria-label="Hero"
     >
-      {/* ── Cinematic background layers ─────────────────────────────────── */}
+      {/* ── Background layers ────────────────────────────────────────── */}
 
-      {/* Base: near-black */}
-      <div className="absolute inset-0 bg-[#080808]" aria-hidden="true" />
+      {/* Base */}
+      <div className="absolute inset-0 bg-[#FAF7F4]" aria-hidden="true" />
 
-      {/* Radial gold glow — centre-bottom, very subtle */}
+      {/* Soft rose bloom — centre-bottom */}
       <div
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
         style={{
           background:
-            "radial-gradient(ellipse 80% 50% at 50% 100%, rgba(201,168,76,0.09) 0%, transparent 70%)",
+            "radial-gradient(ellipse 80% 55% at 50% 90%, rgba(168,71,106,0.10) 0%, rgba(196,120,138,0.04) 45%, transparent 70%)",
         }}
       />
 
-      {/* Second glow — upper-right, adds depth */}
+      {/* Upper-right corner bloom */}
       <div
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
         style={{
           background:
-            "radial-gradient(ellipse 50% 40% at 80% 10%, rgba(201,168,76,0.05) 0%, transparent 60%)",
+            "radial-gradient(ellipse 60% 45% at 88% 8%, rgba(168,71,106,0.07) 0%, transparent 55%)",
         }}
       />
 
-      {/* Horizontal line — architectural detail */}
+      {/* Drifting orb */}
+      <div
+        className="absolute pointer-events-none rounded-full"
+        aria-hidden="true"
+        style={{
+          width: 600,
+          height: 600,
+          top: "0%",
+          left: "52%",
+          background: "radial-gradient(circle, rgba(168,71,106,0.06) 0%, transparent 70%)",
+          animation: "drift 22s infinite ease-in-out",
+        }}
+      />
+
+      {/* Top line */}
       <div
         className="absolute top-0 left-0 right-0 h-px pointer-events-none"
         aria-hidden="true"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent)" }}
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(168,71,106,0.5), transparent)",
+        }}
       />
 
-      {/* ── Content ─────────────────────────────────────────────────────── */}
-      <div className="container relative z-10 flex flex-col items-center text-center pt-28 pb-20">
+      {/* ── Content ─────────────────────────────────────────────────── */}
+      <div className="container relative z-10 flex flex-col items-center text-center pt-36 pb-24">
         <motion.div
           variants={container}
           initial="hidden"
@@ -72,54 +88,59 @@ export default function Hero() {
           className="flex flex-col items-center"
         >
 
-          {/* Pre-headline badge */}
-          <motion.div variants={fadeUp} className="mb-8">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[rgba(201,168,76,0.25)] bg-[rgba(201,168,76,0.06)] text-[#C9A84C] text-xs font-medium tracking-widest uppercase">
-              <ShieldCheck size={12} />
+          {/* Badge */}
+          <motion.div variants={fadeUp} className="mb-11">
+            <span
+              className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full text-[#A8476A] text-[0.68rem] font-semibold tracking-[0.14em] uppercase"
+              style={{
+                border: "1px solid rgba(168,71,106,0.22)",
+                background: "rgba(168,71,106,0.07)",
+              }}
+            >
+              <span className="text-[0.5rem]">✦</span>
               Human-Verified Members Only
             </span>
           </motion.div>
 
-          {/* Main headline — Bricolage Grotesque 800, 64px → 96px → 112px */}
+          {/* Main headline */}
           <motion.h1
             variants={fadeUp}
-            className="font-[family-name:var(--font-heading)] font-extrabold text-[#F5F0E8] leading-[0.95] tracking-[-0.03em] mb-6"
+            className="font-[family-name:var(--font-heading)] font-extrabold text-[#1C1218] tracking-[-0.03em] mb-[4.5rem]"
             style={{
-              fontSize: "clamp(3.5rem, 10vw, 7rem)",
+              fontSize: "clamp(3.75rem, 10vw, 7.5rem)",
+              lineHeight: 1.05,
             }}
           >
             India&rsquo;s most
             <br />
-            <span
-              className="relative inline-block"
+            <em
+              className="not-italic"
               style={{
-                WebkitTextStroke: "0px transparent",
-                background: "linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #C9A84C 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
+                fontFamily: "var(--font-serif)",
+                fontStyle: "italic",
+                fontWeight: 500,
+                fontSize: "1em",
+                color: "#A8476A",
+                letterSpacing: "-0.02em",
               }}
             >
               exclusive circle.
-            </span>
+            </em>
           </motion.h1>
 
           {/* Sub-headline */}
           <motion.p
             variants={fadeUp}
-            className="max-w-xl text-[#888888] text-lg md:text-xl leading-relaxed mb-3"
-            style={{ fontFamily: "var(--font-body)" }}
+            className="max-w-[440px] text-[#7A6670] text-lg md:text-xl leading-relaxed mb-3"
           >
             Every profile human-verified. Every connection curated.
-            <br className="hidden sm:block" />
             Every experience, luxury.
           </motion.p>
 
-          {/* Restraint line — Bottega Veneta tone */}
+          {/* Restraint line */}
           <motion.p
             variants={fadeUp}
-            className="text-[#555555] text-sm tracking-wide mb-10"
-            style={{ fontFamily: "var(--font-body)" }}
+            className="text-[#B0A0A8] text-sm tracking-[0.08em] font-medium mb-14"
           >
             Not for everyone. Intentionally.
           </motion.p>
@@ -129,40 +150,39 @@ export default function Hero() {
             variants={fadeUp}
             className="flex flex-col sm:flex-row items-center gap-4"
           >
-            <Link href="/signup" className="btn-gold text-[0.9rem] py-3.5 px-7 flex items-center gap-2">
+            <Link href="/signup" className="btn-rose text-[0.9rem] py-3.5 px-7 flex items-center gap-2">
               Apply for Membership
               <ArrowRight size={15} />
             </Link>
             <Link href="#how-it-works" className="btn-ghost text-[0.9rem] py-3.5 px-7">
-              See how it works
+              How it works
             </Link>
           </motion.div>
 
           {/* Trust bar */}
           <motion.div
             variants={fadeIn}
-            className="mt-16 flex flex-col sm:flex-row items-center gap-6 sm:gap-10 text-[#555555] text-xs tracking-wide"
+            className="mt-20 flex flex-col sm:flex-row items-center gap-6 sm:gap-12 text-[#B0A0A8] text-xs tracking-wide"
           >
-            <span className="flex items-center gap-2">
-              <span className="w-1 h-1 rounded-full bg-[#C9A84C] opacity-60" aria-hidden="true" />
-              No algorithm. Only curation.
-            </span>
-            <span className="hidden sm:block w-px h-4 bg-white/10" aria-hidden="true" />
-            <span className="flex items-center gap-2">
-              <span className="w-1 h-1 rounded-full bg-[#C9A84C] opacity-60" aria-hidden="true" />
-              Identity verified before access
-            </span>
-            <span className="hidden sm:block w-px h-4 bg-white/10" aria-hidden="true" />
-            <span className="flex items-center gap-2">
-              <span className="w-1 h-1 rounded-full bg-[#C9A84C] opacity-60" aria-hidden="true" />
-              India · Dubai · London · New York
-            </span>
+            {[
+              "No algorithm. Only curation.",
+              "Identity verified before access",
+              "India · Dubai · London · New York",
+            ].map((item, i) => (
+              <span key={i} className="flex items-center gap-2">
+                <span
+                  className="w-1 h-1 rounded-full bg-[#A8476A] opacity-70"
+                  aria-hidden="true"
+                />
+                {item}
+              </span>
+            ))}
           </motion.div>
 
         </motion.div>
       </div>
 
-      {/* ── Scroll indicator ─────────────────────────────────────────────── */}
+      {/* ── Scroll indicator ─────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -170,19 +190,19 @@ export default function Hero() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         aria-hidden="true"
       >
-        <span className="text-[#444444] text-[10px] tracking-[0.2em] uppercase">Scroll</span>
+        <span className="text-[#B0A0A8] text-[10px] tracking-[0.2em] uppercase">Scroll</span>
         <motion.div
           animate={{ y: [0, 6, 0] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          className="w-px h-6 bg-gradient-to-b from-[#444444] to-transparent"
+          className="w-px h-6 bg-gradient-to-b from-[#B0A0A8] to-transparent"
         />
       </motion.div>
 
-      {/* ── Bottom fade — blends into next section ───────────────────────── */}
+      {/* ── Bottom fade ──────────────────────────────────────────────── */}
       <div
         className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
         aria-hidden="true"
-        style={{ background: "linear-gradient(to bottom, transparent, #080808)" }}
+        style={{ background: "linear-gradient(to bottom, transparent, #FAF7F4)" }}
       />
     </section>
   )

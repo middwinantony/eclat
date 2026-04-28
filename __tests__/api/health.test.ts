@@ -36,15 +36,15 @@ describe("GET /api/health", () => {
     expect(typeof body.timestamp).toBe("string")
   })
 
-  it("returns 503 when database is unreachable", async () => {
+  it("returns 200 with db unavailable when database is unreachable", async () => {
     mockDb.$queryRaw.mockRejectedValue(new Error("Connection refused"))
 
     const res  = await GET()
     const body = await res.json()
 
-    expect(res.status).toBe(503)
-    expect(body.status).toBe("error")
-    expect(body.message).toBe("Database unavailable")
+    expect(res.status).toBe(200)       // App Runner needs 200 to pass health checks
+    expect(body.status).toBe("ok")     // top-level status is always ok
+    expect(body.db).toBe("unavailable")
     expect(body.timestamp).toBeDefined()
   })
 
@@ -58,13 +58,14 @@ describe("GET /api/health", () => {
     expect(ts.toString()).not.toBe("Invalid Date")
   })
 
-  it("does not expose error internals in 503 response", async () => {
+  it("does not expose error internals in response", async () => {
     mockDb.$queryRaw.mockRejectedValue(new Error("password authentication failed for user eclat"))
 
     const res  = await GET()
     const body = await res.json()
 
-    expect(res.status).toBe(503)
+    expect(res.status).toBe(200)
+    expect(body.db).toBe("unavailable")
     // Internal error message must not leak to callers
     expect(JSON.stringify(body)).not.toContain("password authentication failed")
     expect(JSON.stringify(body)).not.toContain("eclat")

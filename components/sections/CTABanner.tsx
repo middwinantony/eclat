@@ -6,21 +6,35 @@ import { ArrowRight } from "lucide-react"
 
 export default function CTABanner() {
   return (
-    <section aria-label="Call to action" className="section bg-[#080808]">
+    <section aria-label="Call to action" className="section bg-[#FAF7F4]">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-2xl px-8 py-16 md:px-20 md:py-20 flex flex-col items-center text-center"
+          className="relative overflow-hidden rounded-[1.75rem] px-8 py-20 md:px-20 md:py-24 flex flex-col items-center text-center"
           style={{
-            background: "linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #BF9B3A 100%)",
+            background: "linear-gradient(135deg, #A8476A 0%, #C4688A 50%, #953D5E 100%)",
+            boxShadow: "0 24px 80px rgba(168,71,106,0.25)",
           }}
         >
-          {/* Subtle grain on the gold surface */}
+          {/* Shimmer streak */}
+          <div className="shimmer-streak" aria-hidden="true" />
+
+          {/* Inner bloom */}
           <div
-            className="absolute inset-0 pointer-events-none opacity-[0.06]"
+            className="absolute inset-0 pointer-events-none"
+            aria-hidden="true"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 70% at 50% 50%, rgba(255,255,255,0.07) 0%, transparent 70%)",
+            }}
+          />
+
+          {/* Grain */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.04]"
             aria-hidden="true"
             style={{
               backgroundImage:
@@ -30,31 +44,28 @@ export default function CTABanner() {
             }}
           />
 
-          {/* Radial vignette so edges feel deeper */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            aria-hidden="true"
-            style={{
-              background:
-                "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(0,0,0,0.12) 100%)",
-            }}
-          />
-
           {/* Content */}
           <div className="relative flex flex-col items-center">
-            <p className="text-[rgba(0,0,0,0.45)] text-xs tracking-[0.25em] uppercase font-semibold mb-6">
+            <p className="text-white/50 text-xs tracking-[0.25em] uppercase font-semibold mb-7">
               Membership is by application only
             </p>
 
             <h2
-              className="font-[family-name:var(--font-heading)] font-bold text-[#1A1100] leading-[1.0] tracking-[-0.03em] mb-6"
-              style={{ fontSize: "clamp(2.25rem, 6vw, 4.5rem)" }}
+              className="text-white leading-[1.0] mb-7"
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontStyle: "italic",
+                fontWeight: 500,
+                fontSize: "clamp(3rem, 7vw, 5.5rem)",
+                letterSpacing: "-0.01em",
+              }}
             >
               Your circle
-              <br />is waiting.
+              <br />
+              is waiting.
             </h2>
 
-            <p className="text-[rgba(0,0,0,0.5)] text-base md:text-lg leading-relaxed max-w-sm mb-10">
+            <p className="text-white/55 text-base md:text-lg leading-relaxed max-w-sm mb-11">
               Applications take under 5 minutes.
               We review every one personally.
             </p>
@@ -62,14 +73,19 @@ export default function CTABanner() {
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-[#1A1100] text-[#C9A84C] font-semibold text-sm tracking-wide hover:bg-[#0D0900] transition-colors duration-200 whitespace-nowrap"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-sm tracking-wide transition-all duration-200 hover:opacity-90"
+                style={{
+                  background: "rgba(255,255,255,0.92)",
+                  color: "#A8476A",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                }}
               >
                 Apply for Membership
                 <ArrowRight size={15} />
               </Link>
               <Link
                 href="/login"
-                className="text-sm font-medium text-[rgba(0,0,0,0.5)] hover:text-[rgba(0,0,0,0.75)] transition-colors duration-200"
+                className="text-sm font-medium text-white/50 hover:text-white/75 transition-colors duration-200"
               >
                 Already a member? Sign in
               </Link>

@@ -44,6 +44,7 @@ ARG NEXT_PUBLIC_SENTRY_DSN
 ARG SKIP_ENV_VALIDATION=1
 
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV SKIP_ENV_VALIDATION=${SKIP_ENV_VALIDATION}
 ENV NODE_ENV=${NODE_ENV}
 ENV NEXT_PUBLIC_PUSHER_KEY=${NEXT_PUBLIC_PUSHER_KEY}
 ENV NEXT_PUBLIC_PUSHER_CLUSTER=${NEXT_PUBLIC_PUSHER_CLUSTER}
@@ -72,10 +73,12 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Copy Prisma schema and generated client
+# Copy Prisma schema (needed for migrations at runtime)
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# Bust cache so every push produces a unique digest (App Runner re-deploys on digest change)
+ARG BUILD_TIME=0
+ENV BUILD_TIME=${BUILD_TIME}
 
 # Set correct ownership
 RUN chown -R nextjs:nodejs /app

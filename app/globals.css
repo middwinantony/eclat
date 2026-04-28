@@ -3,49 +3,52 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ─── eclat Design System ─────────────────────────────────────────────────── */
+/* ─── eclat Design System — Light Blush ──────────────────────────────────── */
 
 :root {
   /* Brand colours */
-  --eclat-bg:           #080808;
-  --eclat-surface:      #111111;
-  --eclat-surface-2:    #1A1A1A;
-  --eclat-border:       rgba(255, 255, 255, 0.07);
-  --eclat-border-gold:  rgba(201, 168, 76, 0.25);
-  --eclat-fg:           #F5F0E8;
-  --eclat-muted:        #888888;
-  --eclat-gold:         #C9A84C;
-  --eclat-gold-light:   #E8C96A;
-  --eclat-gold-muted:   rgba(201, 168, 76, 0.12);
-  --eclat-gold-glow:    rgba(201, 168, 76, 0.15);
+  --eclat-bg:           #FAF7F4;
+  --eclat-bg-alt:       #F3EDE7;
+  --eclat-surface:      #FFFFFF;
+  --eclat-border:       rgba(0, 0, 0, 0.07);
+  --eclat-border-rose:  rgba(168, 71, 106, 0.22);
+  --eclat-fg:           #1C1218;
+  --eclat-muted:        #7A6670;
+  --eclat-muted-2:      #B0A0A8;
+  --eclat-rose:         #A8476A;
+  --eclat-rose-light:   #C4688A;
+  --eclat-rose-bg:      rgba(168, 71, 106, 0.07);
+  --eclat-rose-bg-hover:rgba(168, 71, 106, 0.13);
+  --eclat-rose-glow:    rgba(168, 71, 106, 0.18);
 
   /* Typography */
   --font-heading: 'Bricolage Grotesque', system-ui, sans-serif;
   --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-serif:   'Cormorant Garamond', Georgia, serif;
 
   /* Spacing / layout */
   --max-width:    1200px;
   --radius:       0.75rem;
 
   /* shadcn token overrides — mapped to eclat palette */
-  --background:          #080808;
-  --foreground:          #F5F0E8;
-  --card:                #111111;
-  --card-foreground:     #F5F0E8;
-  --popover:             #111111;
-  --popover-foreground:  #F5F0E8;
-  --primary:             #C9A84C;
-  --primary-foreground:  #080808;
-  --secondary:           #1A1A1A;
-  --secondary-foreground:#F5F0E8;
-  --muted:               #1A1A1A;
-  --muted-foreground:    #888888;
-  --accent:              #1A1A1A;
-  --accent-foreground:   #F5F0E8;
+  --background:          #FAF7F4;
+  --foreground:          #1C1218;
+  --card:                #FFFFFF;
+  --card-foreground:     #1C1218;
+  --popover:             #FFFFFF;
+  --popover-foreground:  #1C1218;
+  --primary:             #A8476A;
+  --primary-foreground:  #FFFFFF;
+  --secondary:           #F3EDE7;
+  --secondary-foreground:#1C1218;
+  --muted:               #F3EDE7;
+  --muted-foreground:    #7A6670;
+  --accent:              #F3EDE7;
+  --accent-foreground:   #1C1218;
   --destructive:         #E53E3E;
-  --border:              rgba(255, 255, 255, 0.07);
-  --input:               rgba(255, 255, 255, 0.07);
-  --ring:                rgba(201, 168, 76, 0.4);
+  --border:              rgba(0, 0, 0, 0.07);
+  --input:               rgba(0, 0, 0, 0.07);
+  --ring:                rgba(168, 71, 106, 0.3);
   --radius:              0.75rem;
 }
 
@@ -72,8 +75,16 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  line-height: 1.1;
+  line-height: 1.05;
   letter-spacing: -0.02em;
+}
+
+/* Italic serif accent — used on headline emphasis spans */
+.serif-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 /* ─── Layout helpers ─────────────────────────────────────────────────────── */
@@ -94,41 +105,43 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .section {
-  padding-block: 6rem;
+  padding-block: 7rem;
 }
 
 @media (min-width: 768px) {
-  .section { padding-block: 8rem; }
+  .section { padding-block: 9rem; }
 }
 
 /* ─── Button primitives ──────────────────────────────────────────────────── */
 
-.btn-gold {
+.btn-rose {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: var(--eclat-gold);
-  color: #080808;
+  background: linear-gradient(135deg, var(--eclat-rose) 0%, var(--eclat-rose-light) 100%);
+  color: #ffffff;
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.875rem;
   letter-spacing: 0.01em;
-  padding: 0.75rem 1.75rem;
+  padding: 0.8rem 1.75rem;
   border-radius: var(--radius);
   border: none;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s ease, transform 0.15s ease;
+  transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
   white-space: nowrap;
+  box-shadow: 0 2px 18px var(--eclat-rose-glow);
 }
 
-.btn-gold:hover {
-  background: var(--eclat-gold-light);
+.btn-rose:hover {
+  opacity: 0.9;
   transform: translateY(-1px);
+  box-shadow: 0 4px 28px var(--eclat-rose-glow);
 }
 
-.btn-gold:active {
+.btn-rose:active {
   transform: translateY(0);
 }
 
@@ -142,7 +155,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-body);
   font-weight: 500;
   font-size: 0.875rem;
-  padding: 0.75rem 1.75rem;
+  padding: 0.8rem 1.75rem;
   border-radius: var(--radius);
   border: 1px solid var(--eclat-border);
   cursor: pointer;
@@ -152,16 +165,64 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-ghost:hover {
-  border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(0, 0, 0, 0.14);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* ─── Section ornament ───────────────────────────────────────────────────── */
+
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.ornament::before,
+.ornament::after {
+  content: '';
+  display: block;
+  width: 2rem;
+  height: 1px;
+  background: var(--eclat-rose);
+  opacity: 0.5;
+}
+
+.ornament-dot {
+  color: var(--eclat-rose);
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+/* ─── Card primitives ────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--eclat-surface);
+  border: 1px solid var(--eclat-border);
+  border-radius: 1.25rem;
+  box-shadow: 0 2px 20px rgba(168, 71, 106, 0.07), 0 1px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 40px rgba(168, 71, 106, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-color: var(--eclat-border-rose);
+  transform: translateY(-3px);
+}
+
+.card-featured {
+  border-color: var(--eclat-border-rose);
+  box-shadow: 0 8px 48px rgba(168, 71, 106, 0.18), 0 2px 8px rgba(0, 0, 0, 0.06);
+  transform: translateY(-8px);
+}
+
+/* ─── Rose glow utility ──────────────────────────────────────────────────── */
+
+.rose-glow {
+  box-shadow: 0 0 40px var(--eclat-rose-glow);
 }
 
 /* ─── Grain texture overlay ──────────────────────────────────────────────── */
-/* Applied to the hero section for cinematic film texture */
-
-.grain-overlay {
-  position: relative;
-}
 
 .grain-overlay::after {
   content: '';
@@ -172,22 +233,32 @@ h1, h2, h3, h4, h5, h6 {
   background-size: 200px 200px;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.045;
+  opacity: 0.035;
 }
 
-/* ─── Gold glow utility ──────────────────────────────────────────────────── */
+/* ─── Shimmer animation (CTA banner) ─────────────────────────────────────── */
 
-.gold-glow {
-  box-shadow: 0 0 40px var(--eclat-gold-glow);
+@keyframes shimmer {
+  0%   { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(350%)  skewX(-12deg); }
 }
 
-/* ─── Divider ────────────────────────────────────────────────────────────── */
+.shimmer-streak {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 28%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+  animation: shimmer 4s 0.8s infinite;
+  pointer-events: none;
+}
 
-.divider-gold {
-  width: 3rem;
-  height: 1px;
-  background: var(--eclat-gold);
-  display: block;
+/* ─── Drift animation (Hero orb) ─────────────────────────────────────────── */
+
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  40%  { transform: translate(30px, -22px) scale(1.04); }
+  70%  { transform: translate(-18px, 28px) scale(0.97); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 
 /* ─── Tailwind @theme inline overrides ──────────────────────────────────── */

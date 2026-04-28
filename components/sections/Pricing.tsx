@@ -70,7 +70,7 @@ export default function Pricing() {
   const [annual, setAnnual] = useState(false)
 
   return (
-    <section id="pricing" className="section bg-[#080808]" aria-label="Pricing">
+    <section id="pricing" className="section bg-[#F3EDE7]" aria-label="Pricing">
       <div className="container">
 
         {/* Header */}
@@ -81,14 +81,18 @@ export default function Pricing() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-14 md:mb-16"
         >
-          <span className="block divider-gold mb-6" aria-hidden="true" />
+          {/* Ornament */}
+          <div className="ornament" aria-hidden="true">
+            <span className="ornament-dot">✦</span>
+          </div>
+
           <h2
-            className="font-[family-name:var(--font-heading)] font-bold text-[#F5F0E8] leading-[1.05] tracking-[-0.03em] mb-4"
+            className="font-[family-name:var(--font-heading)] font-bold text-[#1C1218] leading-[1.05] tracking-[-0.03em] mb-4"
             style={{ fontSize: "clamp(2rem, 5vw, 3.25rem)" }}
           >
             Membership tiers.
           </h2>
-          <p className="text-[#555555] text-sm tracking-wide">
+          <p className="text-[#B0A0A8] text-sm tracking-wide">
             All tiers require an approved application.
           </p>
         </motion.div>
@@ -105,7 +109,7 @@ export default function Pricing() {
             onClick={() => setAnnual(false)}
             className={cn(
               "text-sm font-medium transition-colors duration-200",
-              !annual ? "text-[#F5F0E8]" : "text-[#555555] hover:text-[#888888]"
+              !annual ? "text-[#1C1218]" : "text-[#B0A0A8] hover:text-[#7A6670]"
             )}
           >
             Monthly
@@ -118,14 +122,14 @@ export default function Pricing() {
             className={cn(
               "relative w-11 h-6 rounded-full border transition-colors duration-300",
               annual
-                ? "bg-[rgba(201,168,76,0.15)] border-[rgba(201,168,76,0.35)]"
-                : "bg-white/[0.06] border-white/[0.12]"
+                ? "border-[rgba(168,71,106,0.35)] bg-[rgba(168,71,106,0.12)]"
+                : "border-black/[0.12] bg-black/[0.06]"
             )}
           >
             <span
               className={cn(
                 "absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-300",
-                annual ? "translate-x-5 bg-[#C9A84C]" : "translate-x-0 bg-[#555555]"
+                annual ? "translate-x-5 bg-[#A8476A]" : "translate-x-0 bg-[#B0A0A8]"
               )}
             />
           </button>
@@ -133,11 +137,17 @@ export default function Pricing() {
             onClick={() => setAnnual(true)}
             className={cn(
               "flex items-center gap-2 text-sm font-medium transition-colors duration-200",
-              annual ? "text-[#F5F0E8]" : "text-[#555555] hover:text-[#888888]"
+              annual ? "text-[#1C1218]" : "text-[#B0A0A8] hover:text-[#7A6670]"
             )}
           >
             Annual
-            <span className="text-[0.65rem] font-semibold tracking-wide text-[#C9A84C] border border-[rgba(201,168,76,0.3)] bg-[rgba(201,168,76,0.07)] px-1.5 py-0.5 rounded">
+            <span
+              className="text-[0.65rem] font-semibold tracking-wide text-[#A8476A] px-1.5 py-0.5 rounded"
+              style={{
+                border: "1px solid rgba(168,71,106,0.28)",
+                background: "rgba(168,71,106,0.07)",
+              }}
+            >
               SAVE 20%
             </span>
           </button>
@@ -158,21 +168,25 @@ export default function Pricing() {
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.65, ease: "easeOut", delay: i * 0.12 }}
                 className={cn(
-                  "relative flex flex-col rounded-xl p-8 md:p-9",
-                  tier.featured
-                    ? "bg-[#111111] border border-[rgba(201,168,76,0.3)]"
-                    : "bg-[#0D0D0D] border border-white/[0.07]"
+                  "relative flex flex-col rounded-[1.25rem] p-9 md:p-10 bg-white",
+                  tier.featured ? "card-featured" : "card"
                 )}
               >
                 {/* Popular badge */}
                 {tier.featured && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[0.65rem] font-semibold tracking-[0.15em] uppercase text-[#080808] bg-[#C9A84C] px-3 py-1 rounded-full whitespace-nowrap">
+                  <span
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 text-[0.65rem] font-bold tracking-[0.15em] uppercase text-white px-4 py-1 rounded-full whitespace-nowrap"
+                    style={{
+                      background: "linear-gradient(135deg, #A8476A, #C4688A)",
+                      boxShadow: "0 2px 14px rgba(168,71,106,0.35)",
+                    }}
+                  >
                     Most Popular
                   </span>
                 )}
 
                 {/* Tier name */}
-                <p className="text-[#C9A84C] text-xs tracking-[0.2em] uppercase font-medium mb-3">
+                <p className="text-[#A8476A] text-[0.65rem] tracking-[0.2em] uppercase font-semibold mb-3">
                   {tier.name}
                 </p>
 
@@ -185,22 +199,22 @@ export default function Pricing() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 8 }}
                       transition={{ duration: 0.2 }}
-                      className="font-[family-name:var(--font-heading)] font-bold text-[#F5F0E8] tracking-[-0.03em] leading-none"
+                      className="font-[family-name:var(--font-heading)] font-bold text-[#1C1218] tracking-[-0.03em] leading-none"
                       style={{ fontSize: "clamp(2rem, 4vw, 2.75rem)" }}
                     >
                       {formatINR(monthly)}
                     </motion.span>
                   </AnimatePresence>
-                  <span className="text-[#555555] text-sm mb-1">/mo</span>
+                  <span className="text-[#B0A0A8] text-sm mb-1">/mo</span>
                 </div>
 
                 {annual && (
-                  <p className="text-[#555555] text-xs mb-1">
+                  <p className="text-[#B0A0A8] text-xs mb-1">
                     Billed as {formatINR(monthly * 12)}/year
                   </p>
                 )}
 
-                <p className="text-[#666666] text-sm leading-relaxed mb-8 mt-2">
+                <p className="text-[#7A6670] text-sm leading-relaxed mb-8 mt-2">
                   {tier.description}
                 </p>
 
@@ -208,9 +222,9 @@ export default function Pricing() {
                 <Link
                   href="/signup"
                   className={cn(
-                    "mb-8 text-[0.85rem] py-3 px-6 text-center rounded-lg font-semibold transition-all duration-200",
+                    "mb-8 text-[0.85rem] py-3 px-6 text-center rounded-xl font-semibold transition-all duration-200",
                     tier.featured
-                      ? "btn-gold"
+                      ? "btn-rose"
                       : "btn-ghost"
                   )}
                 >
@@ -218,7 +232,7 @@ export default function Pricing() {
                 </Link>
 
                 {/* Divider */}
-                <div className="border-t border-white/[0.06] mb-7" />
+                <div className="border-t border-black/[0.06] mb-7" />
 
                 {/* Features list */}
                 <ul className="flex flex-col gap-3 flex-1">
@@ -226,10 +240,10 @@ export default function Pricing() {
                     <li key={f} className="flex items-start gap-3">
                       <Check
                         size={13}
-                        className="text-[#C9A84C] mt-0.5 shrink-0 opacity-80"
+                        className="text-[#A8476A] mt-0.5 shrink-0 opacity-80"
                         strokeWidth={2.5}
                       />
-                      <span className="text-[#888888] text-sm leading-snug">{f}</span>
+                      <span className="text-[#7A6670] text-sm leading-snug">{f}</span>
                     </li>
                   ))}
                 </ul>
@@ -244,7 +258,7 @@ export default function Pricing() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-10 text-center text-[#444444] text-xs tracking-wide"
+          className="mt-10 text-center text-[#B0A0A8] text-xs tracking-wide"
         >
           Prices in Indian Rupees. NRI members may pay in USD, AED, or GBP at checkout.
           All plans auto-renew and can be cancelled anytime.
