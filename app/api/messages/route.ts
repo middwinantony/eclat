@@ -9,7 +9,7 @@ const sendSchema = z.object({
   content: z.string().min(1).max(2000),
 })
 
-async function getConversationForUser(conversationId: string, userId: string) {
+async function getConversationForUser(conversationId: string, _userId: string) {
   return db.conversation.findUnique({
     where: { id: conversationId },
     include: { match: { select: { user1Id: true, user2Id: true } } },

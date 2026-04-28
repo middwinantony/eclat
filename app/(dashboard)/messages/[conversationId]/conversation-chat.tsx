@@ -41,10 +41,10 @@ export function ConversationChat({ conversationId, otherUser }: Props) {
     }
   }, [conversationId])
 
-  useEffect(() => { fetchMessages() }, [fetchMessages])
+  useEffect(() => { void fetchMessages() }, [fetchMessages])
 
   useEffect(() => {
-    const id = setInterval(fetchMessages, 30_000)
+    const id = setInterval(() => { void fetchMessages() }, 30_000)
     return () => clearInterval(id)
   }, [fetchMessages])
 
@@ -92,7 +92,7 @@ export function ConversationChat({ conversationId, otherUser }: Props) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      handleSend()
+      void handleSend()
     }
   }
 
