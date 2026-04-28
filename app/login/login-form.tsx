@@ -9,15 +9,17 @@ import { motion } from "framer-motion"
 import { Eye, EyeOff, ArrowRight } from "lucide-react"
 import { loginSchema, type LoginInput } from "@/lib/validators/auth"
 
+const INPUT = "w-full bg-white border border-black/[0.08] rounded-lg px-4 py-3 text-sm text-[#1C1218] placeholder-[#B0A0A8] outline-none focus:border-[rgba(168,71,106,0.4)] focus:ring-1 focus:ring-[rgba(168,71,106,0.15)] transition-all duration-200"
+
 function FieldError({ message }: { message?: string }) {
   if (!message) return null
-  return <p className="mt-1.5 text-xs text-red-400/80">{message}</p>
+  return <p className="mt-1.5 text-xs text-red-500/80">{message}</p>
 }
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const [serverError, setServerError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [serverError, setServerError]   = useState<string | null>(null)
+  const [loading, setLoading]           = useState(false)
 
   const {
     register,
@@ -56,25 +58,25 @@ export function LoginForm() {
       className="w-full max-w-md"
     >
       {/* Card */}
-      <div className="rounded-2xl border border-white/[0.08] bg-[#0D0D0D] p-8 md:p-10">
+      <div className="rounded-2xl border border-black/[0.07] bg-white p-8 md:p-10 shadow-sm">
 
         {/* Header */}
         <div className="mb-8">
-          <span className="block w-8 h-px bg-[#C9A84C] mb-5 opacity-70" aria-hidden="true" />
+          <span className="block w-8 h-px bg-[#A8476A] mb-5 opacity-70" aria-hidden="true" />
           <h1
-            className="font-[family-name:var(--font-heading)] font-bold text-[#F5F0E8] tracking-[-0.03em] leading-tight mb-2"
+            className="font-[family-name:var(--font-heading)] font-bold text-[#1C1218] tracking-[-0.03em] leading-tight mb-2"
             style={{ fontSize: "clamp(1.6rem, 4vw, 2rem)" }}
           >
             Welcome back.
           </h1>
-          <p className="text-[#555555] text-sm">
+          <p className="text-[#7A6670] text-sm">
             Sign in to your eclat account.
           </p>
         </div>
 
         {/* Server error */}
         {serverError && (
-          <div className="mb-6 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          <div className="mb-6 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
             {serverError}
           </div>
         )}
@@ -83,7 +85,7 @@ export function LoginForm() {
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-xs font-medium text-[#888888] tracking-wide uppercase mb-2">
+            <label htmlFor="email" className="block text-xs font-medium text-[#7A6670] tracking-wide uppercase mb-2">
               Email
             </label>
             <input
@@ -92,7 +94,7 @@ export function LoginForm() {
               autoComplete="email"
               placeholder="you@example.com"
               {...register("email")}
-              className="w-full bg-[#111111] border border-white/[0.08] rounded-lg px-4 py-3 text-sm text-[#F5F0E8] placeholder-[#333333] outline-none focus:border-[rgba(201,168,76,0.4)] focus:ring-1 focus:ring-[rgba(201,168,76,0.2)] transition-all duration-200"
+              className={INPUT}
             />
             <FieldError message={errors.email?.message} />
           </div>
@@ -100,12 +102,12 @@ export function LoginForm() {
           {/* Password */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label htmlFor="password" className="block text-xs font-medium text-[#888888] tracking-wide uppercase">
+              <label htmlFor="password" className="block text-xs font-medium text-[#7A6670] tracking-wide uppercase">
                 Password
               </label>
               <Link
                 href="/forgot-password"
-                className="text-xs text-[#555555] hover:text-[#C9A84C] transition-colors duration-200"
+                className="text-xs text-[#7A6670] hover:text-[#A8476A] transition-colors duration-200"
               >
                 Forgot password?
               </Link>
@@ -117,12 +119,12 @@ export function LoginForm() {
                 autoComplete="current-password"
                 placeholder="••••••••"
                 {...register("password")}
-                className="w-full bg-[#111111] border border-white/[0.08] rounded-lg px-4 py-3 pr-11 text-sm text-[#F5F0E8] placeholder-[#333333] outline-none focus:border-[rgba(201,168,76,0.4)] focus:ring-1 focus:ring-[rgba(201,168,76,0.2)] transition-all duration-200"
+                className={`${INPUT} pr-11`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#444444] hover:text-[#888888] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B0A0A8] hover:text-[#7A6670] transition-colors"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -135,7 +137,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="btn-gold w-full mt-2 py-3.5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            className="btn-rose w-full mt-2 py-3.5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             {loading ? "Signing in…" : (
               <>
@@ -149,22 +151,20 @@ export function LoginForm() {
 
         {/* Divider */}
         <div className="flex items-center gap-4 my-7">
-          <div className="flex-1 h-px bg-white/[0.06]" />
-          <span className="text-[#333333] text-xs tracking-wide">or</span>
-          <div className="flex-1 h-px bg-white/[0.06]" />
+          <div className="flex-1 h-px bg-black/[0.06]" />
+          <span className="text-[#B0A0A8] text-xs tracking-wide">or</span>
+          <div className="flex-1 h-px bg-black/[0.06]" />
         </div>
 
-        {/* Google SSO — client-side signIn fetches CSRF token automatically */}
+        {/* Google SSO */}
         <button
           type="button"
           className="btn-ghost w-full py-3 text-sm flex items-center justify-center gap-3"
           onClick={async () => {
             try {
-              console.log("Google sign-in clicked")
               await signIn("google", { callbackUrl: "/dashboard" })
             } catch (err) {
               console.error("Google sign-in error:", err)
-              alert("Sign-in error: " + String(err))
             }
           }}
         >
@@ -180,9 +180,9 @@ export function LoginForm() {
       </div>
 
       {/* Footer note */}
-      <p className="mt-6 text-center text-[#333333] text-xs tracking-wide">
+      <p className="mt-6 text-center text-[#7A6670] text-xs tracking-wide">
         Don&rsquo;t have an account?{" "}
-        <Link href="/signup" className="text-[#C9A84C] hover:underline underline-offset-2">
+        <Link href="/signup" className="text-[#A8476A] hover:underline underline-offset-2">
           Apply for membership
         </Link>
       </p>
