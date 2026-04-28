@@ -33,6 +33,13 @@ yarn-error.log*
 # Vercel
 .vercel
 
+# Terraform — provider binaries and local state (never commit these)
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+crash.log
+
 # PWA
 **/public/sw.js
 **/public/workbox-*.js
