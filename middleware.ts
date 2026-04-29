@@ -41,12 +41,11 @@ const PROTECTED_PREFIXES = [
   '/api/hide',
   '/api/verification',
   '/api/events',
-  '/api/admin',
   '/api/matchmaker',
   '/api/pusher',
 ]
 
-const ADMIN_PREFIXES      = ['/admin',      '/api/admin']
+const ADMIN_PREFIXES      = ['/admin']
 const MATCHMAKER_PREFIXES = ['/matchmaker', '/api/matchmaker']
 
 const PUBLIC_PATHS = [
@@ -86,14 +85,6 @@ export default auth(async (req: NextAuthRequest) => {
 
   // Skip middleware for public paths
   if (isPublicPath(pathname)) return NextResponse.next()
-
-  // Admin API routes with a valid X-Admin-Key bypass session auth
-  if (pathname.startsWith('/api/admin')) {
-    const adminKey = req.headers.get('x-admin-key')
-    if (adminKey && adminKey === process.env.ADMIN_SECRET_KEY) {
-      return NextResponse.next()
-    }
-  }
 
   // Only apply auth checks to protected routes
   if (!requiresAuth(pathname)) return NextResponse.next()
