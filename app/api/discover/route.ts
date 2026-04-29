@@ -17,6 +17,7 @@ export async function GET(_req: NextRequest) {
     where: {
       userId: session.user.id,
       date:   today,
+      action: "UNSEEN",
     },
     include: {
       candidate: {
