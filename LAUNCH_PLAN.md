@@ -619,17 +619,22 @@ Use the stripe package (already in package.json), db from @/lib/db, auth is NOT 
 
 #### TASK 2 — Set up Stripe webhook in the Stripe dashboard (20 min)
 
-🖱️ Go to stripe.com → Developers → Webhooks → Add endpoint
+🖱️ Go to stripe.com → Developers → Webhooks
 
-1. Endpoint URL: `https://test.eclat.social/api/webhooks/stripe`
-2. Select events to listen to:
+> **Note:** The Stripe UI shows **"Add destination"** (not "Add endpoint") — this is the same thing.
+> Click **Add destination** and select **Webhook endpoint** as the destination type.
+
+Fill in the form:
+1. **Destination name:** `eclat-stripe-webhook`
+2. **Endpoint URL:** `https://test.eclat.social/api/webhooks/stripe`
+3. **Description:** `Stripe billing webhook for subscriptions` (optional)
+4. Select these 3 events:
    - `checkout.session.completed`
-   - `customer.subscription.created`
    - `customer.subscription.updated`
    - `customer.subscription.deleted`
-3. Click **Add endpoint**
-4. Click on the endpoint you just created → click **Reveal** under Signing secret
-5. Copy the signing secret (starts with `whsec_`)
+5. Click **Add destination**
+6. Click on the destination you just created → click **Reveal** under Signing secret
+7. Copy the signing secret (starts with `whsec_`)
 
 🖱️ AWS Console → App Runner → `eclat-test` → Configuration → Environment variables
 Add: `STRIPE_WEBHOOK_SECRET` = the `whsec_` value you just copied
