@@ -3,7 +3,7 @@ import { Resend } from "resend"
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM   = process.env.EMAIL_FROM ?? "eclat <noreply@eclat.com>"
 
-// eslint-disable-next-line no-secrets/no-secrets
+/* eslint-disable no-secrets/no-secrets */
 function baseHtml(content: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -43,6 +43,7 @@ function baseHtml(content: string): string {
 </body>
 </html>`
 }
+/* eslint-enable no-secrets/no-secrets */
 
 export async function sendVerificationApproved(to: string, name: string): Promise<void> {
   const firstName = name.split(" ")[0]
