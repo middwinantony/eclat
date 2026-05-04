@@ -1,7 +1,11 @@
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM   = process.env.EMAIL_FROM ?? "eclat <noreply@eclat.com>"
+let _resend: Resend | null = null
+function getResend(): Resend {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY)
+  return _resend
+}
+const FROM = () => process.env.EMAIL_FROM ?? "eclat <noreply@eclat.com>"
 
 /* eslint-disable no-secrets/no-secrets */
 function baseHtml(content: string): string {
@@ -47,8 +51,8 @@ function baseHtml(content: string): string {
 
 export async function sendVerificationApproved(to: string, name: string): Promise<void> {
   const firstName = name.split(" ")[0]
-  await resend.emails.send({
-    from:    FROM,
+  await getResend().emails.send({
+    from:    FROM(),
     to,
     subject: "You're in — welcome to eclat.",
     html: baseHtml(`
@@ -71,8 +75,8 @@ export async function sendVerificationApproved(to: string, name: string): Promis
 
 export async function sendVerificationRejected(to: string, name: string): Promise<void> {
   const firstName = name.split(" ")[0]
-  await resend.emails.send({
-    from:    FROM,
+  await getResend().emails.send({
+    from:    FROM(),
     to,
     subject: "Your eclat application",
     html: baseHtml(`
