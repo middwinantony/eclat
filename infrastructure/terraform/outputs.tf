@@ -26,7 +26,7 @@ output "public_subnet_ids" {
 
 output "app_runner_service_url" {
   description = "App Runner service URL (before custom domain). Null until create_app_runner_service = true."
-  value       = var.create_app_runner_service ? "https://${aws_apprunner_service.eclat[0].service_url}" : null
+  value       = var.create_app_runner_service ? try("https://${aws_apprunner_service.eclat[0].service_url}", null) : null
 }
 
 output "app_runner_service_arn" {

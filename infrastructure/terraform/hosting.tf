@@ -17,6 +17,7 @@
 resource "aws_ecr_repository" "eclat" {
   name                 = "eclat-${var.environment}"
   image_tag_mutability = "MUTABLE" # allows updating the 'latest' tag on each deploy
+  force_delete         = true      # allows terraform to delete repo even if it contains images
 
   # Scan images for known vulnerabilities on every push
   image_scanning_configuration {
