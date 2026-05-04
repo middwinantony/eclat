@@ -60,6 +60,7 @@ const VALID_BODY = {
   password:    "SecurePass1!",
   acceptTerms: true,
   dateOfBirth: "1993-05-15",
+  gender:      "FEMALE",
 }
 
 function makeRequest(body: unknown): NextRequest {
