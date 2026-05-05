@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { motion } from "framer-motion"
-import { Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react"
+import { Eye, EyeOff, ArrowRight, ShieldCheck, Link2 } from "lucide-react"
 import { signupSchema, type SignupInput } from "@/lib/validators/auth"
 
 function FieldError({ message }: { message?: string }) {
@@ -22,6 +22,13 @@ const PASSWORD_HINTS = [
   "One special character (!@#$…)",
 ]
 
+const GENDER_OPTIONS = [
+  { value: "MALE",             label: "Male"             },
+  { value: "FEMALE",           label: "Female"           },
+  { value: "NON_BINARY",       label: "Non-binary"       },
+  { value: "PREFER_NOT_TO_SAY",label: "Prefer not to say"},
+] as const
+
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError]   = useState<string | null>(null)
@@ -31,13 +38,16 @@ export default function SignupPage() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: { acceptTerms: undefined as unknown as true },
   })
 
-  const password = watch("password", "")
+  const password    = watch("password", "")
+  const gender      = watch("gender")
+  const isMale      = gender === "MALE"
 
   const passwordStrength = {
     length:  password.length >= 8,
@@ -185,6 +195,56 @@ export default function SignupPage() {
                 />
                 <FieldError message={errors.dateOfBirth?.message} />
               </div>
+
+              {/* Gender */}
+              <div>
+                <p className="block text-xs font-medium text-[#7A6670] tracking-wide uppercase mb-2">
+                  I identify as
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {GENDER_OPTIONS.map(({ value, label }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setValue("gender", value, { shouldValidate: true })}
+                      className={`py-2.5 px-4 rounded-lg border text-sm font-medium transition-all duration-150 text-left ${
+                        gender === value
+                          ? "border-[#A8476A] bg-[#A8476A]/[0.06] text-[#A8476A]"
+                          : "border-black/[0.08] bg-white text-[#7A6670] hover:border-[#A8476A]/40"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <FieldError message={errors.gender?.message} />
+              </div>
+
+              {/* LinkedIn — required for male applicants */}
+              {isMale && (
+                <div>
+                  <label htmlFor="linkedinUrl" className="block text-xs font-medium text-[#7A6670] tracking-wide uppercase mb-2">
+                    LinkedIn Profile
+                  </label>
+                  <div className="relative">
+                    <Link2
+                      size={14}
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#B0A0A8]"
+                    />
+                    <input
+                      id="linkedinUrl"
+                      type="url"
+                      placeholder="https://linkedin.com/in/your-profile"
+                      {...register("linkedinUrl")}
+                      className={`${INPUT} pl-9`}
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[0.65rem] text-[#B0A0A8] tracking-wide">
+                    Required for male applicants. Used to verify professional background.
+                  </p>
+                  <FieldError message={errors.linkedinUrl?.message} />
+                </div>
+              )}
 
               {/* Password */}
               <div>

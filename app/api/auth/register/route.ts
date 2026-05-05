@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const { name, email, password, dateOfBirth } = parsed.data
+  const { name, email, password, dateOfBirth, gender, linkedinUrl } = parsed.data
 
   // Check for existing account — same error message either way (no email enumeration)
   const existing = await db.user.findUnique({
@@ -54,7 +54,10 @@ export async function POST(req: NextRequest) {
       passwordHash,
       dateOfBirth: new Date(dateOfBirth),
       profile: {
-        create: {}, // empty profile scaffold created immediately
+        create: {
+          gender,
+          ...(linkedinUrl?.trim() ? { linkedinUrl: linkedinUrl.trim() } : {}),
+        },
       },
     },
     select: { id: true, email: true, name: true },

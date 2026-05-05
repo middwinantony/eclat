@@ -36,6 +36,18 @@ export const signupSchema = z.object({
       const age = today.getFullYear() - birthDate.getFullYear()
       return age >= 18
     }, 'You must be at least 18 years old to use eclat'),
+  gender: z.enum(['MALE', 'FEMALE', 'NON_BINARY', 'PREFER_NOT_TO_SAY'], {
+    errorMap: () => ({ message: 'Please select your gender.' }),
+  }),
+  linkedinUrl: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.gender === 'MALE' && (!data.linkedinUrl || data.linkedinUrl.trim() === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'LinkedIn profile URL is required for male applicants.',
+      path: ['linkedinUrl'],
+    })
+  }
 })
 
 export const loginSchema = z.object({
