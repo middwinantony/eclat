@@ -273,6 +273,16 @@ resource "aws_apprunner_service" "eclat" {
   }
 
   tags = { Name = "eclat-${var.environment}-apprunner" }
+
+  lifecycle {
+    # Env vars and image tag are managed outside Terraform (App Runner console /
+    # GitHub Actions deploys). Ignore them here so terraform apply never wipes
+    # the manually-set secrets or rolls back to an older image.
+    ignore_changes = [
+      source_configuration[0].image_repository[0].image_configuration[0].runtime_environment_variables,
+      source_configuration[0].image_repository[0].image_identifier,
+    ]
+  }
 }
 
 # ─── App Runner Auto-scaling ──────────────────────────────────────────────────
